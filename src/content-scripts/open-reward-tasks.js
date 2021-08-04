@@ -3,7 +3,10 @@ function clickElement(e, checkVisibility = true) {
   // e.offsetParent checks that the element (and its parents) do not have the style property 'display: none'
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetParent
   // this will break if e has style property 'position: fixed', but that shouldn't happen
-  if (!checkVisibility || e.offsetParent) e.click();
+  if (!checkVisibility || e.offsetParent){
+    e.click();
+    // console.log(`ABS info1: element clicked`);
+  } 
 }
 
 function clickAll(selector, parent = document) {
@@ -20,7 +23,8 @@ function clickAll(selector, parent = document) {
     if (cards.length) {
       cards.forEach(card => {
         if (card.querySelector('.mee-icon-AddMedium')) {
-          clickAll('a.c-call-to-action', card);
+        console.log(`ABS info1: clicking ${card.innerText}`);
+        clickAll('a.c-call-to-action', card);
         }
       });
     }
