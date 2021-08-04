@@ -3,9 +3,6 @@ Chrome Extension and Firefox Addon to automatically perform a number of daily se
 
 ![](/screenshots/popup.png)
 
-Chrome Extension: https://chrome.google.com/webstore/detail/abs/ipbgaooglppjombmbgebgmaehjkfabme
-
-Firefox Addon: https://addons.mozilla.org/en-CA/firefox/addon/abs/
 
 
 ## Upcoming Features
