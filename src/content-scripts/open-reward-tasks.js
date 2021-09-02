@@ -24,7 +24,7 @@ function clickAll(selector, parent = document) {
       cards.forEach(card => {
         if (card.querySelector('.mee-icon-AddMedium')) {
         console.log(`ABS info1: clicking ${card.innerText}`);
-        clickAll('a.c-call-to-action', card);
+        clickAll('a.ds-card-sec', card);
         }
       });
     }
