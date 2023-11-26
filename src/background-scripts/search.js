@@ -81,29 +81,52 @@ async function search(isMobile) {
 
   return new Promise(async (resolve, reject) => {
     const query = await getSearchQuery();
-    chrome.tabs.update(currentSearchingTabId, {
-      url: `https://bing.com/search?q=${query}`,
-    }, () => {
-      // we expect an error if there is the tab is closed, for example
-      if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
 
-      if (prefs.blitzSearch) {
-        // arbitrarily wait 500ms on the last mobile search before resolving
-        // so that there is a delay before disabling the mobile spoofing
-        // (otherwise the last search will occur after the spoofing is disabled)
-        const delay = (mobileCount === desktopCount && desktopCount > 0) ? 500 : 0;
-        setTimeout(resolve, delay);
-        return;
-      }
+    chrome.tabs.get(currentSearchingTabId, tab => {
+      // Check if the current tab's URL is a Bing search results page
+      if (!/^https?:\/\/www\.bing\.com\/search/.test(tab.url)) {
+        // If not, navigate to Bing
+        chrome.tabs.update(currentSearchingTabId, { url: 'https://www.bing.com' }, () => {
+          // we expect an error if there is the tab is closed, for example
+          if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
 
-      function listener(updatedTabId, info) {
-        if (currentSearchingTabId === updatedTabId && info.status === 'complete') {
-          resolve();
-          chrome.tabs.onUpdated.removeListener(listener);
-        }
+          if (prefs.blitzSearch) {
+            // arbitrarily wait 500ms on the last mobile search before resolving
+            // so that there is a delay before disabling the mobile spoofing
+            // (otherwise the last search will occur after the spoofing is disabled)
+            const delay = (mobileCount === desktopCount && desktopCount > 0) ? 500 : 0;
+            setTimeout(resolve, delay);
+            return;
+          }
+
+          function listener(updatedTabId, info) {
+            if (currentSearchingTabId === updatedTabId && info.status === 'complete') {
+              searchContentScript(currentSearchingTabId, query);
+              resolve();
+              chrome.tabs.onUpdated.removeListener(listener);
+            }
+          }
+          chrome.tabs.onUpdated.addListener(listener);
+        });
+      } else {
+        searchContentScript(currentSearchingTabId, query);
+        resolve();
       }
-      chrome.tabs.onUpdated.addListener(listener);
     });
+  });
+}
+
+/**
+ * The content script to inject to perform the searches directly in the DOM
+ * @param {tabId} tabId 
+ * @param {string} query 
+ */
+function searchContentScript(tabId, query) {
+  chrome.tabs.executeScript({
+    code: `
+    document.querySelector('#sb_form_q').value = "${query}";
+    document.querySelector('form#sb_form').submit();
+    `
   });
 }
 
