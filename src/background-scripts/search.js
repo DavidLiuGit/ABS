@@ -122,7 +122,7 @@ async function search(isMobile) {
  * @param {string} query 
  */
 function searchContentScript(tabId, query) {
-  chrome.tabs.executeScript({
+  chrome.tabs.executeScript(tabId, {
     code: `
     document.querySelector('#sb_form_q').value = "${query}";
     document.querySelector('form#sb_form').submit();
@@ -181,7 +181,7 @@ async function searchLoop(currentSearchingTabId) {
       searchTimeout = setTimeout(() => searchLoop(currentSearchingTabId), currentDelay);
     }
   } catch (err) {
-    console.error(err.message);
+    console.warn("searchLoop error:", err);
     stopSearches();
   }
 }
